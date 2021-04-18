@@ -108,11 +108,10 @@ app.post("/v6_login", (req, res) => {
     var _data = do_decrypt(req.body.data);
     
     console.log(_data);
-    res.write("{\"data\":\"" + do_encrypt(_data) + "\"}");
+    res.write("data=" + do_encrypt(_data));
     res.end();
     
 });
-
 
 
 
