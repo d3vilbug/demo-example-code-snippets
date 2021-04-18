@@ -1,0 +1,412 @@
+<html>
+    <head>
+        <title>AES Killer - Demo App</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js" integrity="sha512-nOQuvD9nKirvxDdvQ9OMqe2dgapbPB7vYAMrzJihw5m+aNcf0dX53m6YxM4LgA9u8e9eg9QX+/+mPu8kCNpV2A==" crossorigin="anonymous"></script>
+
+        <script type="text/javascript">
+
+            $(function(){
+                
+                var _secret_key = "aaaaaaaaaaaaaaaa";
+                var _iv_param = "bbbbbbbbbbbbbbbb";
+                var _host = "http://localhost:3000";
+
+                function do_encrypt(_str){
+                    var key = CryptoJS.enc.Utf8.parse(_secret_key);
+                    var iv = CryptoJS.enc.Utf8.parse(_iv_param);
+                    var enc_data = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(_str), key, { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+                    return enc_data.toString();
+                }
+
+                function do_decrypt(_str){
+                    var key = CryptoJS.enc.Utf8.parse(_secret_key);
+                    var iv = CryptoJS.enc.Utf8.parse(_iv_param);
+                    var plain_text = CryptoJS.AES.decrypt(_str, key, { keySize: 128 / 8, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+                    return plain_text.toString(CryptoJS.enc.Utf8);
+                }
+
+                var _string = "admin";
+                var enc_str = do_encrypt(_string);
+                var dec_str = do_decrypt(enc_str);
+                
+                console.log("_string :: " + _string);
+                console.log("enc_str :: " + enc_str);
+                console.log("dec_str :: " + dec_str);
+
+
+                $("#v1_login").click(function(){
+
+                    var _username = $("#v1_username").val();
+                    var _password = $("#v1_password").val();
+
+                    var req_body = "username="+_username+"&password="+_password;
+                    console.log(req_body);
+
+                    var enc_req_body = do_encrypt(req_body).toString();
+                    var enc_data = do_decrypt(enc_req_body);
+                    console.log(enc_req_body);
+                    console.log(enc_data);
+                    
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v1_login",
+                        dataType: "text",
+                        data: enc_req_body,
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+                $("#v3_login").click(function(){
+
+                    var _username = $("#v3_username").val();
+                    var _password = $("#v3_password").val();
+
+                    var req_body = {
+                        username: do_encrypt(_username),
+                        password: do_encrypt(_password)
+                    };
+                    console.log(req_body);
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v3_login",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(req_body),
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+
+                $("#v2_login").click(function(){
+
+                    var _username = $("#v2_username").val();
+                    var _password = $("#v2_password").val();
+
+                    var req_body = "username="+do_encrypt(_username)+"&password="+do_encrypt(_password);
+                    console.log(req_body);
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v2_login",
+                        dataType: "application/x-www-form-urlencoded",
+                        data: req_body,
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+
+
+
+                $("#v4_login").click(function(){
+
+                    var _username = $("#v4_username").val();
+                    var _password = $("#v4_password").val();
+
+                    var req_body = {
+                        username: do_encrypt(_username),
+                        password: do_encrypt(_password)
+                    };
+                    console.log(req_body);
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v4_login",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(req_body),
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+
+                $("#v5_login").click(function(){
+
+                    var _username = $("#v5_username").val();
+                    var _password = $("#v5_password").val();
+
+                    var req_body = {
+                        username: _username,
+                        password: _password
+                    };
+
+                    var enc_req_body = "data=" + do_encrypt(JSON.stringify(req_body));
+                    console.log(enc_req_body);
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v5_login",
+                        dataType: "text",
+                        data: enc_req_body,
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+
+                $("#v6_login").click(function(){
+
+                    var _username = $("#v6_username").val();
+                    var _password = $("#v6_password").val();
+
+                    var req_body = {
+                        username: _username,
+                        password: _password
+                    };
+
+                    var json_req_body = { data: do_encrypt(JSON.stringify(req_body))};
+                    console.log(json_req_body);
+
+                    $.ajax({
+                        type: "POST",
+                        url: _host + "/v6_login",
+                        dataType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(json_req_body),
+                        success: function(){
+                            console.log("request sent .... success");
+                        },
+                        error: function(){
+                            console.log("request sent .... failed");
+                        }
+                    });
+                });
+
+            });
+
+
+
+        </script>
+
+
+
+
+
+    </head>
+
+    <body class="blue-grey darken-4">
+        <div class="container">
+            <div class="row">
+                <h1 class="white-text">AES Killer Demo App</h1>
+            </div>
+
+            <!-- // -------------------------- First Row --------------------------------------------- -->
+            <div class="row">
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Complete Request & Reponse request</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v1_username" type="text" class="validate">
+                            <label class="active" for="v1_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v1_password" type="password" class="validate">
+                            <label class="active" for="v1_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v1_login">
+                    </div>
+
+                </div>
+                <div class="col l2"></div>
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Specific Request Parameters and complete response</h5>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v2_username" type="text" class="validate">
+                            <label class="active" for="v2_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v2_password" type="password" class="validate">
+                            <label class="active" for="v2_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v2_login">
+                    </div>
+
+                </div>
+
+            </div>
+
+            
+            
+            
+            
+            
+            <!-- ---------------------------------- Second Row --------------------------------------- -->
+
+            <div class="row">
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Specific JSON Request parameters & complete response</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v3_username" type="text" class="validate">
+                            <label class="active" for="v3_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v3_password" type="password" class="validate">
+                            <label class="active" for="v3_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v3_login">
+                    </div>
+
+                </div>
+                <div class="col l2"></div>
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Specific Request and Response Parameters </h5>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v4_username" type="text" class="validate">
+                            <label class="active" for="v4_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v4_password" type="password" class="validate">
+                            <label class="active" for="v4_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v4_login">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+
+            <!-- ------------------------------- Third Row -------------------------------------------- -->
+
+            <div class="row">
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Override Request & Response - Form</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v5_username" type="text" class="validate">
+                            <label class="active" for="v5_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v5_password" type="password" class="validate">
+                            <label class="active" for="v5_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v5_login">
+                    </div>
+
+                </div>
+
+                <div class="col l2"></div>
+                <div class="col l5">
+
+                    <div class="row">
+                        <h5 class="white-text">Override Request & Response - JSON</h5>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v6_username" type="text" class="validate">
+                            <label class="active" for="v6_username">User Name</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="input-field col">
+                            <input value="admin" id="v6_password" type="password" class="validate">
+                            <label class="active" for="v6_password">Password</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <input class="btn black" type="button" value="Login" id="v6_login">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
+
+        </div>
+    </body>
+
+</html>
